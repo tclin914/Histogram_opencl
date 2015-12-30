@@ -1,2 +1,7 @@
 serial/image-histogram
+serial/input
+serial/0356100.out
 opencl/histogram
+opencl/input
+opencl/0356100.out
+test/input
