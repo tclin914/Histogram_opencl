@@ -2,11 +2,10 @@ import sys
 import random
 
 def gen(n):
-    m = int(n) / 3
     f = open("input", "w")
-    f.write(str(m * 3))
+    f.write(str(n * 3))
     f.write("\n")
-    for i in range(m):
+    for i in range(n):
         r = random.randrange(0, 256, 1);
         g = random.randrange(0, 256, 1);
         b = random.randrange(0, 256, 1);
@@ -24,4 +23,4 @@ if __name__ == "__main__":
         print "Usage: python data.py num\n"
         sys.exit()
 
-    gen(sys.argv[1]);
+    gen(int(sys.argv[1]));
