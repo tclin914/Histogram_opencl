@@ -173,7 +173,7 @@ int main(int argc, char const *argv[])
     }
 
     // program
-    cl_program program = load_program(context, devices[0], "histogram.cl");
+    cl_program program = load_program(context, devices[0], "../opencl/histogram.cl");
     if (program == 0) {
         std::cerr << "Can't create program\n";
         clReleaseCommandQueue(queue);
@@ -196,29 +196,50 @@ int main(int argc, char const *argv[])
 
     clSetKernelArg(kernel, 0, sizeof(cl_image), &cl_image);
     clSetKernelArg(kernel, 1, sizeof(cl_results), &cl_results);
+    clSetKernelArg(kernel, 2, sizeof(cl_uint), &input_size);
 
-    size_t lSize = 48;
-    size_t gSize = input_size / 48;
-    if (input_size % lSize != 0) {
-        gSize++;
-    }
+    unsigned int num_pixels = input_size / 3;
+    size_t lSize = 32;
+    size_t gSize;
+    // unsigned int g = num_pixels / lSize;
+    // std::cout << "g = " << g << "\n";
+    // int p = 32;
+    // if (g == 0) {
+        // gSize = p;
+    // } else {
+        // unsigned int t = g / p;
+        // if (t == 0) {
+            // gSize = p;
+        // } else {
+            // if ((g % p) == 0) {
+                // gSize = t * p;
+            // } else {
+                // gSize = (t + 1) * p;
+            // }
+        // }
+    // }
+    gSize = num_pixels;
+    lSize = 0;
+    std::cout << "input_size = " << input_size << "\n";
     std::cout << "lSize = " << lSize << " gSize =  " << gSize << "\n";
-    err = clEnqueueNDRangeKernel(queue, kernel, 1, 0, &gSize, &lSize, 0, NULL, NULL);
-    if (err = CL_SUCCESS) {
+    err = clEnqueueNDRangeKernel(queue, kernel, 1, 0, &gSize, 0, 0, NULL, NULL);
+    if (err == CL_SUCCESS) {
         std::cout << "SUCCESS\n";
-
+        err = clEnqueueReadBuffer(queue, cl_results, CL_TRUE, 0, sizeof(cl_uint) * 256 * 3, results, 0, NULL, NULL);
     } else {
         std::cout << "FAIL\n";
     }
-    
-	histogram_results = histogram(image, input_size);
+
 	for(unsigned int i = 0; i < 256 * 3; ++i) {
-		if (i % 256 == 0 && i != 0)
-			outFile << std::endl;
-		outFile << histogram_results[i]<< ' ';
+		if (i % 256 == 0 && i != 0) {
+			outFile << std::endl; 
+            std::cout << std::endl;
+        }
+		outFile << results[i] << ' ';
+        std::cout << results[i] << ' ';
 	}
 
-	inFile.close();
+    inFile.close();
 	outFile.close();
 
 	return 0;
